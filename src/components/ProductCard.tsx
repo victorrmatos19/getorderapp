@@ -1,6 +1,7 @@
 import { Pressable, Text, View } from 'react-native'
 import { Image } from 'expo-image'
 import { fmt } from '@/lib/formatters'
+import { precoEfetivo } from '@/lib/calcComanda'
 import type { Produto } from '@/types'
 
 function Badge({ label, outline }: { label: string; outline?: boolean }) {
@@ -40,7 +41,7 @@ export function ProductCard({ produto, onOpen, isLast }: { produto: Produto; onO
           <View className="flex-row items-baseline gap-2">
             {oferta ? <Text className="text-xs text-muted line-through">{fmt.currency(produto.preco)}</Text> : null}
             <Text className={`text-base font-sans-bold ${esgotado ? 'text-muted line-through' : 'text-price'}`}>
-              {fmt.currency(oferta ? produto.oferta_preco! : produto.preco)}
+              {fmt.currency(precoEfetivo(produto))}
             </Text>
           </View>
         </View>

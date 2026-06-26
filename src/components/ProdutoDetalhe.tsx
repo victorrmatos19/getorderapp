@@ -3,7 +3,7 @@ import { Modal, Pressable, ScrollView, Text, TextInput, View } from 'react-nativ
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { Image } from 'expo-image'
 import { fmt } from '@/lib/formatters'
-import { subtotalItem } from '@/lib/calcComanda'
+import { subtotalItem, precoEfetivo } from '@/lib/calcComanda'
 import type { CartLine } from '@/lib/calcComanda'
 import { useProdutoOpcoes } from '@/lib/hooks/useCardapio'
 import { Spinner } from '@/components/ui/Spinner'
@@ -70,11 +70,11 @@ export function ProdutoDetalhe({
   const totalPreview = useMemo(
     () =>
       subtotalItem({
-        preco_base_snapshot: produto.preco,
+        preco_base_snapshot: precoEfetivo(produto),
         quantidade,
         adicionais: idsSelecionados.map((id) => ({ preco_snapshot: adicionalById.get(id)?.preco ?? 0 })),
       } as unknown as ItemPedido),
-    [produto.preco, quantidade, idsSelecionados, adicionalById],
+    [produto, quantidade, idsSelecionados, adicionalById],
   )
 
   const podeAdicionar = !bloqueado && !produto.esgotado && quantidade >= 1 && gruposPendentes.length === 0
@@ -120,7 +120,12 @@ export function ProdutoDetalhe({
 
           <View className="mt-4 flex-row items-baseline justify-between gap-3">
             <Text className="font-serif text-2xl text-ink" style={{ flexShrink: 1 }}>{produto.nome}</Text>
-            <Text className="font-sans-bold text-base text-price">{fmt.currency(produto.preco)}</Text>
+            <View className="flex-row items-baseline gap-2">
+              {produto.em_oferta && produto.oferta_preco != null && produto.oferta_preco < produto.preco ? (
+                <Text className="text-xs text-muted line-through">{fmt.currency(produto.preco)}</Text>
+              ) : null}
+              <Text className="font-sans-bold text-base text-price">{fmt.currency(precoEfetivo(produto))}</Text>
+            </View>
           </View>
           {produto.descricao ? <Text className="mt-2 text-sm text-text-mid">{produto.descricao}</Text> : null}
 
