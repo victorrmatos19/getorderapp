@@ -1,0 +1,19 @@
+# Suite 10 (S10) — cardápio: produtos + categorias.
+appId: com.optmore.getorder.staff
+---
+- runFlow:
+    file: ../helpers/login.yaml
+    env: { EMAIL: "637@admin.com", SENHA: "teste1234" }
+- extendedWaitUntil:
+    visible:
+      id: "tab-cardapio"
+    timeout: 30000
+- tapOn:
+    id: "tab-cardapio"
+- assertVisible: "Produtos"
+- assertVisible: "Categorias"
+# aba Categorias
+- tapOn: "Categorias"
+- assertVisible: "Categorias"
+# volta para Produtos
+- tapOn: "Produtos"

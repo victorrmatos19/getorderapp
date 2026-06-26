@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Text, TextInput, View } from 'react-native'
+import { KeyboardAvoidingView, Platform, Text, TextInput, View } from 'react-native'
 import { Redirect } from 'expo-router'
 import { supabase } from '@/lib/supabase/client'
 import { useRestaurante } from '@/providers/RestauranteProvider'
@@ -37,7 +37,8 @@ export default function Login() {
   const inputCls = 'border-b border-line py-3 text-base text-ink'
 
   return (
-    <Screen className="px-6 justify-center">
+    <Screen className="px-6">
+      <KeyboardAvoidingView className="flex-1 justify-center" behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <View className="mb-10 items-center">
         <Logo size="xl" />
         <Text className="mt-4 font-serif text-2xl text-ink">Entrar</Text>
@@ -56,6 +57,7 @@ export default function Login() {
           <View>
             <Text className="mb-1 text-xs text-text-mid">Email</Text>
             <TextInput
+              testID="login-email"
               value={email}
               onChangeText={(t) => {
                 setEmail(t)
@@ -71,6 +73,7 @@ export default function Login() {
           <View>
             <Text className="mb-1 text-xs text-text-mid">Senha</Text>
             <TextInput
+              testID="login-senha"
               value={password}
               onChangeText={(t) => {
                 setPassword(t)
@@ -85,9 +88,10 @@ export default function Login() {
 
           {err ? <Text className="text-sm text-accent">{err}</Text> : null}
 
-          <Button label="Entrar" onPress={submit} loading={busy} />
+          <Button label="Entrar" onPress={submit} loading={busy} testID="login-entrar" />
         </View>
       )}
+      </KeyboardAvoidingView>
     </Screen>
   )
 }

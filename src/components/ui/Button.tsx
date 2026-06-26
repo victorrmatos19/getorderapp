@@ -10,12 +10,14 @@ export function Button({
   variant = 'accent',
   loading,
   disabled,
+  testID,
 }: {
   label: string
   onPress: () => void
   variant?: Variant
   loading?: boolean
   disabled?: boolean
+  testID?: string
 }) {
   const off = disabled || loading
   const box =
@@ -37,6 +39,7 @@ export function Button({
 
   return (
     <Pressable
+      testID={testID}
       onPress={off ? undefined : onPress}
       className={`min-h-[48px] flex-row items-center justify-center gap-2 rounded-lg px-5 ${box}`}
       style={{ opacity: off ? 0.9 : 1 }}

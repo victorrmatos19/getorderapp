@@ -1,0 +1,22 @@
+# Subflow de login reutilizável. Parametrizado por EMAIL/SENHA via runFlow env.
+# Ex.: runFlow: { file: ../helpers/login.yaml, env: { EMAIL: 637@admin.com, SENHA: teste1234 } }
+# Roda sobre o build RELEASE (JS embutido, sem dev-launcher/Metro) → abre direto no app.
+appId: com.optmore.getorder.staff
+---
+- launchApp:
+    clearState: true
+- extendedWaitUntil:
+    visible: "Entrar"
+    timeout: 45000
+- tapOn:
+    id: "login-email"
+- inputText: "${EMAIL}"
+- tapOn:
+    id: "login-senha"
+- inputText: "${SENHA}"
+- tapOn:
+    id: "login-entrar"
+# dispensa o diálogo "Salvar Senha?" do iOS (se aparecer)
+- tapOn:
+    text: "Agora Não"
+    optional: true

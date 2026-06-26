@@ -22,7 +22,7 @@ export function Toast({
   if (!visible) return null
   return (
     <SafeAreaView pointerEvents="none" style={{ position: 'absolute', top: 0, left: 0, right: 0 }}>
-      <View className="mx-3 mt-2 rounded-xl px-4 py-3" style={{ backgroundColor: '#2A2A26' }}>
+      <View testID="toast" className="mx-3 mt-2 rounded-xl px-4 py-3" style={{ backgroundColor: '#2A2A26' }}>
         <Text className="text-sm" style={{ color: '#FAF9F5' }}>{message}</Text>
       </View>
     </SafeAreaView>

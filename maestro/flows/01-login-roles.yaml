@@ -1,0 +1,34 @@
+# Suite 1 (S1) — login por papel cai na home certa + logout.
+appId: com.optmore.getorder.staff
+---
+# admin → /admin (tabs)
+- runFlow:
+    file: ../helpers/login.yaml
+    env: { EMAIL: "637@admin.com", SENHA: "teste1234" }
+- extendedWaitUntil:
+    visible:
+      id: "tab-painel"
+    timeout: 30000
+- assertVisible:
+    id: "tab-config"
+# logout pelo "Sair"
+- tapOn: "Sair"
+- extendedWaitUntil:
+    visible: "Entrar"
+    timeout: 20000
+
+# cozinha → /cozinha (kanban; "Novos" é a 1ª coluna visível)
+- runFlow:
+    file: ../helpers/login.yaml
+    env: { EMAIL: "637@cozinha.com", SENHA: "teste1234" }
+- extendedWaitUntil:
+    visible: "Novos"
+    timeout: 30000
+
+# garçom → /garcom (lista; botão "+ Nova comanda")
+- runFlow:
+    file: ../helpers/login.yaml
+    env: { EMAIL: "637@garcom.com", SENHA: "teste1234" }
+- extendedWaitUntil:
+    visible: "\\+ Nova comanda"
+    timeout: 30000

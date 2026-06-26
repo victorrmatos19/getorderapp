@@ -1,0 +1,18 @@
+# Suite 12 (S12) — mesas: a lista carrega com o botão QR por mesa, e o QR é tocável.
+# ⚠️ O conteúdo do QRModal (Modal: QR + URL + Fechar) NÃO é assertável pelo driver iOS do Maestro
+#    (janela de Modal) — verificar a imagem do QR/URL manualmente. Ver README.
+appId: com.optmore.getorder.staff
+---
+- runFlow:
+    file: ../helpers/login.yaml
+    env: { EMAIL: "637@admin.com", SENHA: "teste1234" }
+- extendedWaitUntil:
+    visible:
+      id: "tab-mesas"
+    timeout: 30000
+- tapOn:
+    id: "tab-mesas"
+- assertVisible: "Mesas"
+# botão QR presente (por mesa) e tocável
+- assertVisible: "QR"
+- tapOn: "QR"

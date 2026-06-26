@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
-import { Pressable, ScrollView, Switch, Text, TextInput, View } from 'react-native'
+import { Modal, Platform, Pressable, ScrollView, Switch, Text, TextInput, View } from 'react-native'
+import DateTimePicker from '@react-native-community/datetimepicker'
 import { useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase/client'
 import { useRestaurante } from '@/providers/RestauranteProvider'
@@ -13,14 +14,16 @@ import type { HorarioFuncionamento, Restaurante } from '@/types'
 
 const DIAS = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado']
 
-function maskTime(t: string) {
-  const d = t.replace(/\D/g, '').slice(0, 4)
-  return d.length <= 2 ? d : `${d.slice(0, 2)}:${d.slice(2)}`
+// "HH:MM" → Date (hoje) com a hora setada; tolerante a 1–2 dígitos de hora.
+function fromHm(s: string): Date {
+  const m = /^(\d{1,2}):(\d{2})/.exec(s)
+  const d = new Date()
+  d.setHours(m ? +m[1] : 0, m ? +m[2] : 0, 0, 0)
+  return d
 }
-function validTime(t: string) {
-  const m = /^(\d{2}):(\d{2})$/.exec(t)
-  if (!m) return false
-  return +m[1] < 24 && +m[2] < 60
+// Date → "HH:MM" (sempre 2 dígitos, 24h).
+function toHm(d: Date): string {
+  return `${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`
 }
 
 export default function Config() {
@@ -150,6 +153,7 @@ function HorarioTab({ restauranteId, onToast }: { restauranteId: string | null; 
   const [rows, setRows] = useState<Row[]>([])
   const [loading, setLoading] = useState(true)
   const [busy, setBusy] = useState(false)
+  const [picker, setPicker] = useState<{ dia: number; campo: 'abre' | 'fecha' } | null>(null)
 
   useEffect(() => {
     if (!restauranteId) return
@@ -163,12 +167,6 @@ function HorarioTab({ restauranteId, onToast }: { restauranteId: string | null; 
 
   const save = async () => {
     if (!restauranteId) return
-    for (const r of rows) {
-      if (!r.fechado && (!validTime(r.abre) || !validTime(r.fecha))) {
-        onToast(`Horário inválido em ${DIAS[r.dia_semana]} (use HH:MM).`)
-        return
-      }
-    }
     setBusy(true)
     const payload = rows.map((r) => ({ restaurante_id: restauranteId, dia_semana: r.dia_semana, abre: r.fechado ? null : `${r.abre}:00`, fecha: r.fechado ? null : `${r.fecha}:00`, fechado: r.fechado }))
     const { error } = await supabase.from('horarios_funcionamento').upsert(payload, { onConflict: 'restaurante_id,dia_semana' })
@@ -194,9 +192,13 @@ function HorarioTab({ restauranteId, onToast }: { restauranteId: string | null; 
             </View>
             {!r.fechado ? (
               <View className="mt-2 flex-row items-center gap-2">
-                <TextInput value={r.abre} onChangeText={(t) => update(r.dia_semana, { abre: maskTime(t) })} keyboardType="number-pad" maxLength={5} className="rounded-lg border border-line bg-bg px-2 py-2 text-sm text-ink" style={{ width: 72, textAlign: 'center' }} />
+                <Pressable testID={`horario-${r.dia_semana}-abre`} onPress={() => setPicker({ dia: r.dia_semana, campo: 'abre' })} className="items-center justify-center rounded-lg border border-line bg-bg" style={{ width: 72, minHeight: 44 }}>
+                  <Text className="text-sm text-ink">{r.abre}</Text>
+                </Pressable>
                 <Text className="text-xs text-text-mid">às</Text>
-                <TextInput value={r.fecha} onChangeText={(t) => update(r.dia_semana, { fecha: maskTime(t) })} keyboardType="number-pad" maxLength={5} className="rounded-lg border border-line bg-bg px-2 py-2 text-sm text-ink" style={{ width: 72, textAlign: 'center' }} />
+                <Pressable testID={`horario-${r.dia_semana}-fecha`} onPress={() => setPicker({ dia: r.dia_semana, campo: 'fecha' })} className="items-center justify-center rounded-lg border border-line bg-bg" style={{ width: 72, minHeight: 44 }}>
+                  <Text className="text-sm text-ink">{r.fecha}</Text>
+                </Pressable>
               </View>
             ) : null}
           </View>
@@ -205,6 +207,45 @@ function HorarioTab({ restauranteId, onToast }: { restauranteId: string | null; 
       <View className="mt-6">
         <Button label="Salvar horários" onPress={save} loading={busy} />
       </View>
+
+      {picker && Platform.OS === 'ios' ? (
+        // iOS: spinner num bottom-sheet ancorado (não inline no fim da lista).
+        <Modal visible transparent animationType="slide" onRequestClose={() => setPicker(null)}>
+          <Pressable className="flex-1 justify-end" style={{ backgroundColor: 'rgba(0,0,0,0.45)' }} onPress={() => setPicker(null)}>
+            <Pressable onPress={() => {}} className="bg-bg px-6 pb-8 pt-4" style={{ borderTopLeftRadius: 20, borderTopRightRadius: 20 }}>
+              <View className="mb-1 flex-row items-center justify-between">
+                <Text className="text-sm font-sans-bold text-ink">
+                  {DIAS[picker.dia]} · {picker.campo === 'abre' ? 'Abertura' : 'Fechamento'}
+                </Text>
+                <Pressable testID="time-picker-pronto" onPress={() => setPicker(null)} className="items-center justify-center rounded-lg px-3" style={{ minHeight: 44 }}>
+                  <Text className="text-sm font-sans-bold text-accent">Pronto</Text>
+                </Pressable>
+              </View>
+              <DateTimePicker
+                mode="time"
+                is24Hour
+                display="spinner"
+                value={fromHm(rows.find((r) => r.dia_semana === picker.dia)?.[picker.campo] ?? '00:00')}
+                onChange={(_event, date) => {
+                  if (date) update(picker.dia, { [picker.campo]: toHm(date) })
+                }}
+              />
+            </Pressable>
+          </Pressable>
+        </Modal>
+      ) : picker ? (
+        // Android: diálogo nativo (já é um overlay próprio).
+        <DateTimePicker
+          mode="time"
+          is24Hour
+          display="default"
+          value={fromHm(rows.find((r) => r.dia_semana === picker.dia)?.[picker.campo] ?? '00:00')}
+          onChange={(event, date) => {
+            setPicker(null)
+            if (event.type !== 'dismissed' && date) update(picker.dia, { [picker.campo]: toHm(date) })
+          }}
+        />
+      ) : null}
     </ScrollView>
   )
 }

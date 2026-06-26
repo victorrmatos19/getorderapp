@@ -14,11 +14,11 @@ export default function AdminTabsLayout() {
         tabBarLabelStyle: { fontSize: 11 },
       }}
     >
-      <Tabs.Screen name="index" options={{ title: 'Painel', tabBarIcon: ({ color }) => <TabBarIcon name="painel" color={color} /> }} />
-      <Tabs.Screen name="cardapio" options={{ title: 'Cardápio', tabBarIcon: ({ color }) => <TabBarIcon name="cardapio" color={color} /> }} />
-      <Tabs.Screen name="mesas" options={{ title: 'Mesas', tabBarIcon: ({ color }) => <TabBarIcon name="mesas" color={color} /> }} />
-      <Tabs.Screen name="equipe" options={{ title: 'Equipe', tabBarIcon: ({ color }) => <TabBarIcon name="equipe" color={color} /> }} />
-      <Tabs.Screen name="config" options={{ title: 'Configs', tabBarIcon: ({ color }) => <TabBarIcon name="config" color={color} /> }} />
+      <Tabs.Screen name="index" options={{ title: 'Painel', tabBarButtonTestID: 'tab-painel', tabBarIcon: ({ color }) => <TabBarIcon name="painel" color={color} /> }} />
+      <Tabs.Screen name="cardapio" options={{ title: 'Cardápio', tabBarButtonTestID: 'tab-cardapio', tabBarIcon: ({ color }) => <TabBarIcon name="cardapio" color={color} /> }} />
+      <Tabs.Screen name="mesas" options={{ title: 'Mesas', tabBarButtonTestID: 'tab-mesas', tabBarIcon: ({ color }) => <TabBarIcon name="mesas" color={color} /> }} />
+      <Tabs.Screen name="equipe" options={{ title: 'Equipe', tabBarButtonTestID: 'tab-equipe', tabBarIcon: ({ color }) => <TabBarIcon name="equipe" color={color} /> }} />
+      <Tabs.Screen name="config" options={{ title: 'Configs', tabBarButtonTestID: 'tab-config', tabBarIcon: ({ color }) => <TabBarIcon name="config" color={color} /> }} />
     </Tabs>
   )
 }

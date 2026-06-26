@@ -1,0 +1,26 @@
+# Suite 19 (S19) — Marca / white-label: aba renderiza + salvar (toast).
+appId: com.optmore.getorder.staff
+---
+- runFlow:
+    file: ../helpers/login.yaml
+    env: { EMAIL: "637@admin.com", SENHA: "teste1234" }
+- extendedWaitUntil:
+    visible:
+      id: "tab-config"
+    timeout: 30000
+- tapOn:
+    id: "tab-config"
+- assertVisible: "Configurações"
+- tapOn: "Marca"
+- assertVisible: "Cores da marca"
+# o botão de salvar fica no fim da aba (rola até ele)
+- scrollUntilVisible:
+    element:
+      text: "Salvar marca"
+    direction: DOWN
+    timeout: 20000
+- tapOn: "Salvar marca"
+- extendedWaitUntil:
+    visible:
+      id: "toast"
+    timeout: 15000

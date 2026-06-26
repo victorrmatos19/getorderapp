@@ -1,0 +1,21 @@
+# Suite 9 (S9) — dashboard v2: ao vivo + troca de período + blocos. (export/realtime fora do escopo)
+appId: com.optmore.getorder.staff
+---
+- runFlow:
+    file: ../helpers/login.yaml
+    env: { EMAIL: "637@admin.com", SENHA: "teste1234" }
+- extendedWaitUntil:
+    visible:
+      id: "tab-painel"
+    timeout: 30000
+- assertVisible: "Faturamento"
+# troca de período (recalcula os blocos)
+- tapOn: "7 dias"
+- tapOn: "Mês"
+- tapOn: "Hoje"
+# bloco da tendência (rola até ele)
+- scrollUntilVisible:
+    element:
+      text: "Tendência de faturamento"
+    direction: DOWN
+    timeout: 20000

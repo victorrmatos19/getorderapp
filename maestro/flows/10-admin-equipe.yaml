@@ -1,0 +1,20 @@
+# Suite 20 (S20) — Equipe. GATED: precisa do web local (:3000) no ar (endpoints /api/admin/usuarios).
+# Rode com o web (`cd orderapp && npm run dev`) ou o harness pula via --exclude-tags needs-web.
+appId: com.optmore.getorder.staff
+tags:
+  - needs-web
+---
+- runFlow:
+    file: ../helpers/login.yaml
+    env: { EMAIL: "637@admin.com", SENHA: "teste1234" }
+- extendedWaitUntil:
+    visible:
+      id: "tab-equipe"
+    timeout: 30000
+- tapOn:
+    id: "tab-equipe"
+- assertVisible: "Equipe"
+# a lista carrega (precisa do web Bearer no ar) — senão cai em "Erro ao carregar"
+- extendedWaitUntil:
+    visible: "+ Novo"
+    timeout: 20000

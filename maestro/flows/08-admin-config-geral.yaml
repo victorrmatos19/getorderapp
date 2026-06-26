@@ -1,0 +1,18 @@
+# Suite 13 (S13) — configurações Geral: salvar taxa/pausa sem erro (toast).
+appId: com.optmore.getorder.staff
+---
+- runFlow:
+    file: ../helpers/login.yaml
+    env: { EMAIL: "637@admin.com", SENHA: "teste1234" }
+- extendedWaitUntil:
+    visible:
+      id: "tab-config"
+    timeout: 30000
+- tapOn:
+    id: "tab-config"
+- assertVisible: "Taxa de serviço"
+- tapOn: "Salvar alterações"
+- extendedWaitUntil:
+    visible:
+      id: "toast"
+    timeout: 15000

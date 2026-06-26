@@ -1,0 +1,23 @@
+# Suite 13 + bug do dia (S13) — horário: o campo de hora virou um PICKER (não mais input mascarado).
+# Verifica a presença do campo-picker e que é tocável (abre o time-picker).
+# ⚠️ O conteúdo do sheet (Modal nativo) NÃO é assertável pelo driver iOS do Maestro — o "picker abre
+#    em bottom-sheet ancorado" foi verificado manualmente (screenshots na sessão). Ver README.
+appId: com.optmore.getorder.staff
+---
+- runFlow:
+    file: ../helpers/login.yaml
+    env: { EMAIL: "637@admin.com", SENHA: "teste1234" }
+- extendedWaitUntil:
+    visible:
+      id: "tab-config"
+    timeout: 30000
+- tapOn:
+    id: "tab-config"
+- assertVisible: "Configurações"
+- tapOn: "Horário"
+- assertVisible: "HORÁRIO DE FUNCIONAMENTO"
+# o campo de hora (Pressable com testID) existe e é tocável — não é mais TextInput mascarado
+- assertVisible:
+    id: "horario-0-abre"
+- tapOn:
+    id: "horario-0-abre"
