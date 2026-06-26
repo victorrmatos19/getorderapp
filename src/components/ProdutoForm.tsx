@@ -4,6 +4,7 @@ import { Image } from 'expo-image'
 import * as ImagePicker from 'expo-image-picker'
 import { supabase } from '@/lib/supabase/client'
 import { Spinner } from '@/components/ui/Spinner'
+import { ProdutoGruposSection } from '@/components/ProdutoGruposSection'
 import { fmt } from '@/lib/formatters'
 import type { Categoria, Produto } from '@/types'
 
@@ -170,6 +171,8 @@ export function ProdutoForm({
               <ToggleRow label="Disponível para venda" value={disponivel} onChange={setDisponivel} />
               <ToggleRow label="Esgotado (sem estoque hoje)" value={esgotado} onChange={setEsgotado} />
             </View>
+
+            <ProdutoGruposSection produtoId={initial?.id} restauranteId={restauranteId} />
 
             {err ? <Text className="mt-4 text-xs text-accent">{err}</Text> : null}
 

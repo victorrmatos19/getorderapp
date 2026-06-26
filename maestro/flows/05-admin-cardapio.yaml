@@ -1,4 +1,6 @@
-# Suite 10 (S10) — cardápio: produtos + categorias.
+# Suite 10 (S10) — cardápio: produtos + categorias + adicionais (grupos de modificadores).
+# ⚠️ Os formulários (ProdutoForm/GrupoForm) são RN Modal → conteúdo não assertável pelo Maestro;
+#    a criação de grupo + vínculo ao produto é verificada manualmente (ver README).
 appId: com.optmore.getorder.staff
 ---
 - runFlow:
@@ -15,5 +17,7 @@ appId: com.optmore.getorder.staff
 # aba Categorias
 - tapOn: "Categorias"
 - assertVisible: "Categorias"
-# volta para Produtos
-- tapOn: "Produtos"
+# aba Adicionais (grupos de adicionais — feature portada): renderiza com o botão de novo grupo
+- tapOn:
+    id: "cardapio-tab-adicionais"
+- assertVisible: "\\+ Novo grupo"

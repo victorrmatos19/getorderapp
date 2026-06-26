@@ -11,32 +11,37 @@ import { EmptyState } from '@/components/ui/EmptyState'
 import { Toast } from '@/components/ui/Toast'
 import { Button } from '@/components/ui/Button'
 import { ProdutoForm } from '@/components/ProdutoForm'
+import { GrupoForm } from '@/components/GrupoForm'
 import { useProdutos, useCategorias } from '@/lib/hooks/useCardapio'
 import { useCategoriasAdmin } from '@/lib/hooks/useCategoriasAdmin'
+import { useAdicionais } from '@/lib/hooks/useAdicionais'
+import { resumoRegra } from '@/lib/adicionaisRegra'
 import { fmt } from '@/lib/formatters'
-import type { Categoria, Produto } from '@/types'
+import type { Categoria, GrupoAdicional, Produto } from '@/types'
 
 export default function Cardapio() {
   const { signOut } = useRestaurante()
-  const [tab, setTab] = useState<'produtos' | 'categorias'>('produtos')
+  const [tab, setTab] = useState<'produtos' | 'categorias' | 'adicionais'>('produtos')
   const [toast, setToast] = useState({ visible: false, message: '' })
   const showToast = (message: string) => setToast({ visible: true, message })
+
+  const TAB_LABEL: Record<'produtos' | 'categorias' | 'adicionais', string> = { produtos: 'Produtos', categorias: 'Categorias', adicionais: 'Adicionais' }
 
   return (
     <Screen className="px-5">
       <Header title="Cardápio" subtitle="Admin" onSair={() => signOut()} />
       <View className="mb-3 flex-row gap-2">
-        {(['produtos', 'categorias'] as const).map((t) => {
+        {(['produtos', 'categorias', 'adicionais'] as const).map((t) => {
           const active = tab === t
           return (
-            <Pressable key={t} onPress={() => setTab(t)} className="rounded-xl px-4 py-2" style={{ backgroundColor: active ? '#2A2A26' : 'transparent', borderWidth: 1, borderColor: active ? '#2A2A26' : '#DDD9CC' }}>
-              <Text className="text-sm" style={{ color: active ? '#FAF9F5' : '#6B6A62', fontWeight: active ? '700' : '400' }}>{t === 'produtos' ? 'Produtos' : 'Categorias'}</Text>
+            <Pressable key={t} testID={`cardapio-tab-${t}`} onPress={() => setTab(t)} className="rounded-xl px-4 py-2" style={{ backgroundColor: active ? '#2A2A26' : 'transparent', borderWidth: 1, borderColor: active ? '#2A2A26' : '#DDD9CC' }}>
+              <Text className="text-sm" style={{ color: active ? '#FAF9F5' : '#6B6A62', fontWeight: active ? '700' : '400' }}>{TAB_LABEL[t]}</Text>
             </Pressable>
           )
         })}
       </View>
 
-      {tab === 'produtos' ? <ProdutosTab onToast={showToast} /> : <CategoriasTab onToast={showToast} />}
+      {tab === 'produtos' ? <ProdutosTab onToast={showToast} /> : tab === 'categorias' ? <CategoriasTab onToast={showToast} /> : <AdicionaisTab onToast={showToast} />}
 
       <Toast visible={toast.visible} message={toast.message} onClose={() => setToast((t) => ({ ...t, visible: false }))} />
     </Screen>
@@ -265,5 +270,84 @@ function CategoriaForm({ initial, nextOrdem, busy, onClose, onSubmit }: { initia
         </Pressable>
       </Pressable>
     </Modal>
+  )
+}
+
+function AdicionaisTab({ onToast }: { onToast: (m: string) => void }) {
+  const { restauranteId } = useRestaurante()
+  const { data: grupos = [], isLoading, isError, refetch, salvarGrupo, patchGrupo, removeGrupo, contarVinculados } = useAdicionais(restauranteId)
+  const [editing, setEditing] = useState<GrupoAdicional | null>(null)
+  const [creating, setCreating] = useState(false)
+
+  const excluir = (g: GrupoAdicional) => {
+    contarVinculados(g.id).then((n) => {
+      Alert.alert(
+        'Excluir grupo',
+        n > 0 ? `Este grupo será removido de ${n} produto(s). Excluir "${g.nome}"?` : `Excluir "${g.nome}"?`,
+        [
+          { text: 'Cancelar' },
+          { text: 'Excluir', style: 'destructive', onPress: async () => { try { await removeGrupo.mutateAsync(g.id); onToast('Grupo excluído') } catch (e: any) { onToast(e?.message || 'Erro ao excluir') } } },
+        ],
+      )
+    })
+  }
+
+  return (
+    <View className="flex-1">
+      <View className="mb-2 flex-row items-center justify-between">
+        <Text className="text-xs text-text-mid">Grupos reutilizáveis de adicionais</Text>
+        <Pressable testID="adicional-novo" onPress={() => setCreating(true)} className="rounded-lg bg-ink px-3 py-2"><Text className="font-sans-bold text-xs text-bg">+ Novo grupo</Text></Pressable>
+      </View>
+
+      {isLoading ? (
+        <View className="py-16 items-center"><Spinner color="#9B4A3C" /></View>
+      ) : isError ? (
+        <EmptyState icon="⚠️" title="Erro ao carregar" action={<Pressable onPress={() => refetch()}><Text className="text-sm text-accent underline">Tentar novamente</Text></Pressable>} />
+      ) : grupos.length === 0 ? (
+        <EmptyState icon="🧩" title="Nenhum grupo de adicionais" description="Crie grupos (ex.: Ponto da carne, Adicionais) e vincule-os aos produtos." />
+      ) : (
+        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 24 }}>
+          <View className="gap-2">
+            {grupos.map((g) => (
+              <View key={g.id} className="rounded-xl border border-line bg-surface p-3">
+                <View className="flex-row items-start justify-between">
+                  <View className="min-w-0 flex-1 pr-2">
+                    <Text className="font-sans-bold text-sm text-ink" numberOfLines={1}>{g.nome}</Text>
+                    <Text className="text-xs text-text-mid">{resumoRegra(g)}</Text>
+                  </View>
+                  <Pressable onPress={() => patchGrupo.mutate({ id: g.id, patch: { ativo: !g.ativo } })} className="rounded-full px-2 py-1" style={{ borderWidth: 1, borderColor: g.ativo ? '#567D4F' : '#B8B5AB' }}>
+                    <Text className="text-xs" style={{ color: g.ativo ? '#567D4F' : '#B8B5AB' }}>{g.ativo ? 'Ativo' : 'Inativo'}</Text>
+                  </Pressable>
+                </View>
+                {(g.adicionais ?? []).length > 0 ? (
+                  <View className="mt-2 flex-row flex-wrap" style={{ gap: 4 }}>
+                    {(g.adicionais ?? []).map((a) => (
+                      <View key={a.id} className="rounded-full border border-line px-2 py-0.5" style={{ opacity: a.disponivel ? 1 : 0.5 }}>
+                        <Text className="text-[11px] text-text-mid">{a.nome} · {a.preco > 0 ? fmt.currency(a.preco) : 'grátis'}</Text>
+                      </View>
+                    ))}
+                  </View>
+                ) : null}
+                <View className="mt-3 flex-row gap-2">
+                  <Pressable onPress={() => setEditing(g)} className="flex-1 items-center rounded-lg border border-line py-2"><Text className="text-xs text-text-mid">Editar</Text></Pressable>
+                  <Pressable onPress={() => excluir(g)} className="flex-1 items-center rounded-lg border border-line py-2"><Text className="text-xs text-accent">Excluir</Text></Pressable>
+                </View>
+              </View>
+            ))}
+          </View>
+        </ScrollView>
+      )}
+
+      {creating || editing ? (
+        <GrupoForm
+          initial={editing}
+          busy={salvarGrupo.isPending}
+          onClose={() => { setEditing(null); setCreating(false) }}
+          onSubmit={async (input) => {
+            try { await salvarGrupo.mutateAsync(input); setEditing(null); setCreating(false); onToast('Grupo salvo') } catch (e: any) { onToast(e?.message || 'Erro ao salvar') }
+          }}
+        />
+      ) : null}
+    </View>
   )
 }
