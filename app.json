@@ -1,23 +1,39 @@
 {
   "expo": {
-    "name": "getorderapp",
+    "name": "GetOrder Staff",
     "slug": "getorderapp",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "getorderapp",
-    "userInterfaceStyle": "automatic",
+    "userInterfaceStyle": "light",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
     "ios": {
-      "icon": "./assets/expo.icon"
+      "supportsTablet": true,
+      "bundleIdentifier": "com.optmore.getorder.staff",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
+      "package": "com.optmore.getorder.staff",
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/images/android-icon-foreground.png",
-        "backgroundImage": "./assets/images/android-icon-background.png",
-        "monochromeImage": "./assets/images/android-icon-monochrome.png"
+        "backgroundColor": "#4A5240",
+        "foregroundImage": "./assets/images/android-icon-foreground.png"
       },
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "permissions": [
+        "android.permission.RECORD_AUDIO",
+        "android.permission.MODIFY_AUDIO_SETTINGS",
+        "android.permission.FOREGROUND_SERVICE",
+        "android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK",
+        "android.permission.RECORD_AUDIO",
+        "android.permission.MODIFY_AUDIO_SETTINGS",
+        "android.permission.FOREGROUND_SERVICE",
+        "android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK"
+      ]
     },
     "web": {
       "output": "static",
@@ -28,17 +44,34 @@
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#208AEF",
-          "android": {
-            "image": "./assets/images/splash-icon.png",
-            "imageWidth": 76
-          }
+          "backgroundColor": "#FAF9F5",
+          "image": "./assets/images/splash-icon.png",
+          "imageWidth": 200
         }
-      ]
+      ],
+      "expo-secure-store",
+      "expo-font",
+      "expo-image",
+      "expo-audio",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "O GetOrder usa a galeria para enviar fotos de produtos e o logo do restaurante."
+        }
+      ],
+      "@react-native-community/datetimepicker",
+      "expo-sharing"
     ],
-    "experiments": {
-      "typedRoutes": true,
-      "reactCompiler": true
+    "experiments": {},
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "9d0004a0-0794-4d72-91a7-153173eef9dc"
+      }
+    },
+    "owner": "victorrmatos19",
+    "updates": {
+      "url": "https://u.expo.dev/9d0004a0-0794-4d72-91a7-153173eef9dc"
     }
   }
 }
