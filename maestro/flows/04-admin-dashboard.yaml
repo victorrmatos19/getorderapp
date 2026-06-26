@@ -1,4 +1,5 @@
-# Suite 9 (S9) — dashboard v2: ao vivo + troca de período + blocos. (export/realtime fora do escopo)
+# Suite 9 (S9) — dashboard v2: ao vivo + troca de período + blocos + UX de período vazio.
+# (export/realtime fora do escopo)
 appId: com.optmore.getorder.staff
 ---
 - runFlow:
@@ -11,6 +12,10 @@ appId: com.optmore.getorder.staff
 - assertVisible: "Faturamento"
 # troca de período (recalcula os blocos)
 - tapOn: "7 dias"
+# Período vazio: o seed local não tem comandas fechadas nos últimos 7 dias (última = 17/06),
+# então o Resumo mostra o rótulo neutro "Sem vendas no período" no lugar do "−100% vs anterior".
+- assertVisible: "Sem vendas no período"
+- assertNotVisible: "vs anterior"
 - tapOn: "Mês"
 - tapOn: "Hoje"
 # bloco da tendência (rola até ele)

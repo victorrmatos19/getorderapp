@@ -45,7 +45,7 @@ admin `637@admin.com` · cozinha `637@cozinha.com` · garçom `637@garcom.com`.
 | `01-login-roles` | S1 | login admin/cozinha/garçom → home certa + logout |
 | `02-cozinha` | S7 | kanban: 3 colunas (Novos/Preparando/Prontos) |
 | `03-garcom` | S8/S17 | lista + navegar para "Nova comanda" |
-| `04-admin-dashboard` | S9 | ao vivo + troca de período + blocos |
+| `04-admin-dashboard` | S9 | ao vivo + troca de período + blocos + **período vazio** ("Sem vendas no período" em "7 dias") |
 | `05-admin-cardapio` | S10 | produtos + categorias + **adicionais** (grupos de modificadores) |
 | `06-admin-mesas` | S12 | lista + abrir QR |
 | `07-admin-config-horario` | S13 + bug | ⭐ time picker (bottom-sheet) abre/fecha — regressão do bug da máscara |
@@ -62,6 +62,9 @@ admin `637@admin.com` · cozinha `637@cozinha.com` · garçom `637@garcom.com`.
 - **Share-sheet** do export CSV (diálogo do SO).
 - **Conteúdo renderizado do QR** (a imagem; o flow só confere o modal + a URL).
 - Valores em **R$** exatos (dependem do seed) — asserções por presença/estrutura, não por valor fixo.
+  - ⚠️ O flow do dashboard assume o seed com fechamentos **só >7 dias** (a última é 17/06; como "hoje"
+    só avança, "7 dias" fica sempre vazio → "Sem vendas no período"). Se reseedar com vendas **recentes**
+    (<7 dias), ajustar a asserção do `04-admin-dashboard`.
 
 ## Padrão (regra do projeto)
 Toda **nova feature** ou **correção de bug** no app nativo entra com seu **flow Maestro** aqui

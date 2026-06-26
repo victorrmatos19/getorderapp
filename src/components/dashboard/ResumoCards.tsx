@@ -16,7 +16,7 @@ function DeltaBadge({ delta }: { delta: number | null }) {
   )
 }
 
-function Card({ label, valor, m }: { label: string; valor: string; m: Metrica }) {
+function Card({ label, valor, m, semVendas }: { label: string; valor: string; m: Metrica; semVendas: boolean }) {
   return (
     <View className="flex-1 rounded-xl border border-line bg-surface p-4">
       <Text className="mb-2 text-xs text-text-mid">{label}</Text>
@@ -24,24 +24,36 @@ function Card({ label, valor, m }: { label: string; valor: string; m: Metrica })
         {valor}
       </Text>
       <View className="mt-1 flex-row items-center gap-1">
-        <DeltaBadge delta={m.delta} />
-        <Text className="text-xs text-muted">vs anterior</Text>
+        {semVendas ? (
+          <Text className="text-xs text-muted">—</Text>
+        ) : (
+          <>
+            <DeltaBadge delta={m.delta} />
+            <Text className="text-xs text-muted">vs anterior</Text>
+          </>
+        )}
       </View>
     </View>
   )
 }
 
 export default function ResumoCards({ resumo }: { resumo: Resumo }) {
+  // Sem comandas fechadas no período → todas as métricas são 0 e cairiam num "−100%"
+  // alarmante. Mostra um rótulo neutro no lugar (vale tb p/ semana fraca real em produção).
+  const semVendas = resumo.comandas.atual === 0
   return (
     <View className="gap-2">
       <View className="flex-row gap-2">
-        <Card label="Faturamento" valor={fmt.currency(resumo.faturamento.atual)} m={resumo.faturamento} />
-        <Card label="Ticket médio" valor={fmt.currency(resumo.ticketMedio.atual)} m={resumo.ticketMedio} />
+        <Card label="Faturamento" valor={fmt.currency(resumo.faturamento.atual)} m={resumo.faturamento} semVendas={semVendas} />
+        <Card label="Ticket médio" valor={fmt.currency(resumo.ticketMedio.atual)} m={resumo.ticketMedio} semVendas={semVendas} />
       </View>
       <View className="flex-row gap-2">
-        <Card label="Comandas" valor={String(resumo.comandas.atual)} m={resumo.comandas} />
-        <Card label="Pessoas" valor={String(resumo.pessoas.atual)} m={resumo.pessoas} />
+        <Card label="Comandas" valor={String(resumo.comandas.atual)} m={resumo.comandas} semVendas={semVendas} />
+        <Card label="Pessoas" valor={String(resumo.pessoas.atual)} m={resumo.pessoas} semVendas={semVendas} />
       </View>
+      {semVendas ? (
+        <Text className="text-xs text-muted">Sem vendas no período</Text>
+      ) : null}
     </View>
   )
 }
