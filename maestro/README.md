@@ -66,6 +66,24 @@ admin `637@admin.com` · cozinha `637@cozinha.com` · garçom `637@garcom.com`.
     só avança, "7 dias" fica sempre vazio → "Sem vendas no período"). Se reseedar com vendas **recentes**
     (<7 dias), ajustar a asserção do `04-admin-dashboard`.
 
+## Troubleshooting (gotchas reais já vividos)
+- **Todos os flows falham em `"Entrar" is visible`** → o simulador está com um **build Development
+  (dev-client)**, que abre no **Expo Dev Launcher** (lista de "DEVELOPMENT SERVERS"), não no app.
+  O Maestro exige o **Release**. Builde: `LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8 npx expo run:ios
+  --configuration Release --device <UDID>`. Confirme: o `.app` instalado tem `main.jsbundle`
+  (`xcrun simctl get_app_container booted com.optmore.getorder.staff` → `ls .../main.jsbundle`).
+  ⚠️ Instalar um build dev/TestFlight por cima volta a quebrar — **rebuilde Release**.
+- **Login falha mesmo com Release** (tela de login some mas não vai pra home; ou auth retorna
+  500 `Database error querying schema` / `column users.banned_until does not exist`) → o **schema
+  `auth` do baseline é mais antigo** que o GoTrue do CLI (v2.190+). Um **`npm run db:reset` limpo**
+  resolve (o GoTrue re-migra o `auth` no restart gerenciado pelo CLI). ⚠️ **NÃO** faça
+  `docker restart supabase_auth_*` na mão — pode cascatear e **zerar o banco**; use só
+  `npm run db:start/stop/reset`. Teste rápido: `curl -s -X POST
+  "$URL/auth/v1/token?grant_type=password" -H "apikey: $ANON" -d '{"email":"637@admin.com","password":"teste1234"}'`.
+- **1–2 flows flaky com a app "crashando" no login ou não vendo a tela** → diálogo de sistema do iOS
+  **"Salvar Senha?"** aparecendo com atraso. O `helpers/login.yaml` já dispensa ("Agora Não") de forma
+  robusta; se voltar a incomodar, desligue AutoFill de Senhas nos Ajustes do simulador.
+
 ## Padrão (regra do projeto)
 Toda **nova feature** ou **correção de bug** no app nativo entra com seu **flow Maestro** aqui
 (e o `ROTEIRO.md` é atualizado no web). Ver `CLAUDE.md`.
