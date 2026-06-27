@@ -16,7 +16,18 @@ appId: com.optmore.getorder.staff
 - inputText: "${SENHA}"
 - tapOn:
     id: "login-entrar"
-# dispensa o diálogo "Salvar Senha?" do iOS (se aparecer)
+# iOS pode mostrar "Salvar Senha?" COM ATRASO após o login (race) → espera assentar e dispensa.
+# Faz 2 tentativas (o diálogo às vezes surge só durante a navegação) — tudo opcional, nunca falha.
+- waitForAnimationToEnd:
+    timeout: 3000
+- tapOn:
+    text: "Agora Não"
+    optional: true
+- extendedWaitUntil:
+    notVisible:
+      text: "Salvar Senha"
+    timeout: 4000
+    optional: true
 - tapOn:
     text: "Agora Não"
     optional: true
