@@ -31,6 +31,25 @@ else
     "update auth.users set encrypted_password = crypt('teste1234', gen_salt('bf')) where email in ('637@admin.com','637@cozinha.com','637@garcom.com');"
 fi
 
+# Fixture determinístico p/ o badge "Conta pedida" (03-garcom): o seed não tem comanda aberta,
+# então criamos uma comanda 'aberta' (1 item) com conta_solicitada_em setado na 1ª mesa ativa do 637.
+echo "▸ 3b/6 fixture 'Conta pedida' (badge do garçom)"
+docker exec -i supabase_db_getorder psql -U postgres -d postgres -q >/dev/null 2>&1 <<'SQL'
+do $$
+declare rid uuid; mid uuid; pid uuid; cid uuid;
+begin
+  select id into rid from restaurantes where slug='637-cerveja';
+  select id into mid from mesas where restaurante_id=rid and ativo order by nome limit 1;
+  select id into pid from produtos where restaurante_id=rid and disponivel limit 1;
+  delete from comandas where mesa_id=mid and status='aberta';
+  insert into comandas(restaurante_id,mesa_id,status,conta_solicitada_em)
+    values(rid,mid,'aberta',now()) returning id into cid;
+  insert into itens_pedido(restaurante_id,comanda_id,produto_id,quantidade,status,preco_base_snapshot)
+    values(rid,cid,pid,1,'novo',(select preco from produtos where id=pid));
+end$$;
+SQL
+echo "  ✓ comanda aberta com 'Conta pedida' semeada"
+
 echo "▸ 4/6 simulador + app instalado"
 xcrun simctl boot "$SIM_UDID" >/dev/null 2>&1 || true   # no-op se já booted
 open -a Simulator >/dev/null 2>&1 || true

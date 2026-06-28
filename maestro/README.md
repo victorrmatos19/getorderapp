@@ -44,7 +44,7 @@ admin `637@admin.com` · cozinha `637@cozinha.com` · garçom `637@garcom.com`.
 |---|---|---|
 | `01-login-roles` | S1 | login admin/cozinha/garçom → home certa + logout |
 | `02-cozinha` | S7 | kanban: 3 colunas (Novos/Preparando/Prontos) |
-| `03-garcom` | S8/S17 | lista + navegar para "Nova comanda" |
+| `03-garcom` | S8/S17 | lista + header "Nova comanda" + badge **"Conta pedida"** (fixture do `run.sh` 3b) |
 | `04-admin-dashboard` | S9 | ao vivo + troca de período + blocos + **período vazio** ("Sem vendas no período" em "7 dias") |
 | `05-admin-cardapio` | S10 | produtos + categorias + **adicionais** (grupos de modificadores) |
 | `06-admin-mesas` | S12 | lista + abrir QR |

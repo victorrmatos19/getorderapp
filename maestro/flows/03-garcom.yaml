@@ -1,4 +1,5 @@
-# Suite 8 (S8) — garçom: a lista/home carrega ("+ Nova comanda" no header).
+# Suite 8 (S8) — garçom: a lista/home carrega ("+ Nova comanda" no header) + badge "Conta pedida".
+# O fixture do run.sh (3b) semeia uma comanda aberta com conta_solicitada_em → o badge deve aparecer.
 appId: com.optmore.getorder.staff
 ---
 - runFlow:
@@ -8,3 +9,5 @@ appId: com.optmore.getorder.staff
     visible: "\\+ Nova comanda"
     timeout: 30000
 - assertVisible: "Salão"
+# Bug "pedir a conta": a mesa com solicitação aparece sinalizada (badge terracota).
+- assertVisible: "Conta pedida"

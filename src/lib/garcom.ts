@@ -54,3 +54,9 @@ export async function cancelarComandaVazia(comandaId: string): Promise<void> {
   const { error } = await supabase.rpc('cancelar_comanda_vazia', { p_comanda_id: comandaId })
   if (error) throw error
 }
+
+// Limpa o sinal "conta pedida" (garçom atendeu). Idempotente; tenant-guard no servidor.
+export async function marcarContaAtendida(comandaId: string): Promise<void> {
+  const { error } = await supabase.rpc('marcar_conta_atendida', { p_comanda_id: comandaId })
+  if (error) throw error
+}

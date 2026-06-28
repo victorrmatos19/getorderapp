@@ -13,7 +13,7 @@ import { CheckoutModal } from '@/components/CheckoutModal'
 import { fmt } from '@/lib/formatters'
 import { subtotalItem, totalComanda } from '@/lib/calcComanda'
 import { useComanda, useItensComanda } from '@/lib/hooks/useComanda'
-import { cancelarComandaVazia } from '@/lib/garcom'
+import { cancelarComandaVazia, marcarContaAtendida } from '@/lib/garcom'
 import type { ItemPedido } from '@/types'
 
 function groupRounds(itens: ItemPedido[]): { start: string; items: ItemPedido[] }[] {
@@ -73,6 +73,11 @@ export default function ComandaDetalhe() {
       supabase.removeChannel(ch)
     }
   }, [comandaId, qc, cid])
+
+  // Garçom abriu a comanda → atende a solicitação de conta (limpa o sinal "Conta pedida", se houver).
+  useEffect(() => {
+    marcarContaAtendida(comandaId).catch(() => {})
+  }, [comandaId])
 
   const itens = useMemo(() => itensQ.data ?? [], [itensQ.data])
   const subtotal = useMemo(() => totalComanda(itens), [itens])

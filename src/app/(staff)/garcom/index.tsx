@@ -12,7 +12,7 @@ import { fmt } from '@/lib/formatters'
 import { totalComanda } from '@/lib/calcComanda'
 import type { Comanda, ItemPedido, Mesa } from '@/types'
 
-type Row = Comanda & { mesa: Mesa; itens: (ItemPedido & { produto?: { preco: number } })[] }
+type Row = Comanda & { mesa: Mesa; itens: (ItemPedido & { produto?: { preco: number } })[]; conta_solicitada_em: string | null }
 
 function useGarcomData() {
   return useQuery({
@@ -21,7 +21,7 @@ function useGarcomData() {
       const { data, error } = await supabase
         .from('comandas')
         .select(
-          'id, mesa_id, cliente_nome, criado_em, mesa:mesas(id, nome), itens:itens_pedido(id, status, quantidade, preco_base_snapshot, produto:produtos(preco), adicionais:itens_pedido_adicionais(preco_snapshot))',
+          'id, mesa_id, cliente_nome, criado_em, conta_solicitada_em, mesa:mesas(id, nome), itens:itens_pedido(id, status, quantidade, preco_base_snapshot, produto:produtos(preco), adicionais:itens_pedido_adicionais(preco_snapshot))',
         )
         .eq('status', 'aberta')
         .order('criado_em')
@@ -99,6 +99,7 @@ export default function GarcomList() {
             {byMesa.map(({ mesa, comandas }) => {
               const prontos = comandas.flatMap((c) => c.itens).filter((i) => i.status === 'pronto').length
               const verde = prontos > 0
+              const contaPedida = comandas.some((c) => c.conta_solicitada_em)
               const txt = verde ? '#FAF9F5' : '#2A2A26'
               const sub = verde ? 'rgba(250,249,245,0.78)' : '#6B6A62'
               const linha = verde ? 'rgba(255,255,255,0.18)' : '#DDD9CC'
@@ -111,6 +112,11 @@ export default function GarcomList() {
                   <View className="flex-row items-center justify-between px-4 py-3" style={{ borderBottomWidth: 1, borderBottomColor: linha }}>
                     <Text className="font-serif text-lg" style={{ color: txt }}>{mesa.nome}</Text>
                     <View className="flex-row items-center gap-2">
+                      {contaPedida ? (
+                        <View className="rounded-full bg-accent px-2 py-0.5">
+                          <Text className="font-sans-bold text-xs text-on-accent">Conta pedida</Text>
+                        </View>
+                      ) : null}
                       {verde ? (
                         <View className="rounded-full px-2 py-0.5" style={{ borderWidth: 1, borderColor: 'rgba(255,255,255,0.5)' }}>
                           <Text className="font-sans-bold text-xs" style={{ color: '#FAF9F5' }}>{prontos} prontos</Text>
