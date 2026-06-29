@@ -52,7 +52,12 @@
       "expo-secure-store",
       "expo-font",
       "expo-image",
-      "expo-audio",
+      [
+        "expo-audio",
+        {
+          "enableBackgroundPlayback": false
+        }
+      ],
       [
         "expo-image-picker",
         {
