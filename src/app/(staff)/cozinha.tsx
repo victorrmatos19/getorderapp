@@ -1,4 +1,5 @@
 import { memo, useEffect, useId, useMemo, useRef, useState } from 'react'
+import { Redirect } from 'expo-router'
 import { Dimensions, Pressable, ScrollView, Text, View } from 'react-native'
 import { useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase/client'
@@ -64,7 +65,7 @@ type Group = { key: string; mesa: string; cliente: string; criadoMin: number; it
 
 export default function Cozinha() {
   const qc = useQueryClient()
-  const { restaurante, signOut } = useRestaurante()
+  const { restaurante, restauranteId, role, signOut } = useRestaurante()
   const { data: itens = [], isLoading, isError, refetch } = useItensCozinha()
   const { mudo, alternarMudo, tocar } = useCozinhaAlerta()
   const [conexao, setConexao] = useState<ConexaoStatus>('conectando')
@@ -79,16 +80,27 @@ export default function Cozinha() {
   const alertaTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => {
+    if (!restauranteId) return
     const agendar = () => {
       if (alertaTimer.current) clearTimeout(alertaTimer.current)
       alertaTimer.current = setTimeout(() => tocarRef.current(), 1500)
     }
     const ch = supabase
       .channel(`cozinha-orders-${cid}`)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'itens_pedido' }, (payload) => {
-        qc.invalidateQueries({ queryKey: ['itens', 'cozinha'] })
-        if (payload.eventType === 'INSERT') agendar()
-      })
+      // Filtro por tenant no servidor (perf: não recebe eventos de outros restaurantes).
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'itens_pedido', filter: `restaurante_id=eq.${restauranteId}` },
+        (payload) => {
+          // Defesa em profundidade: chime/refetch só para evento do PRÓPRIO tenant.
+          const rid =
+            (payload.new as { restaurante_id?: string })?.restaurante_id ??
+            (payload.old as { restaurante_id?: string })?.restaurante_id
+          if (rid && rid !== restauranteId) return
+          qc.invalidateQueries({ queryKey: ['itens', 'cozinha'] })
+          if (payload.eventType === 'INSERT') agendar()
+        },
+      )
       .subscribe((status) => {
         if (status === 'SUBSCRIBED') setConexao('ao_vivo')
         else if (status === 'CHANNEL_ERROR') setConexao('sem_conexao')
@@ -98,7 +110,7 @@ export default function Cozinha() {
       if (alertaTimer.current) clearTimeout(alertaTimer.current)
       supabase.removeChannel(ch)
     }
-  }, [qc, cid])
+  }, [qc, cid, restauranteId])
 
   const colunas = useMemo(() => {
     const maps: Record<Tab, Map<string, Group>> = { novo: new Map(), em_preparo: new Map(), pronto: new Map() }
@@ -145,6 +157,12 @@ export default function Cozinha() {
   }
 
   const cfg = CONEXAO[conexao]
+
+  // Guard fino de role (auditoria item 2): /cozinha é admin|cozinha — garçom (ex.: via
+  // deep link getorderapp://cozinha) volta para a própria home. Escrita já é barrada pela RLS.
+  if (role && role !== 'admin' && role !== 'cozinha') {
+    return <Redirect href={role === 'garcom' ? '/garcom' : '/login'} />
+  }
 
   return (
     <ThemeProvider dark>

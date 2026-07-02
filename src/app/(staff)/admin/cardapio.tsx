@@ -17,6 +17,7 @@ import { useCategoriasAdmin } from '@/lib/hooks/useCategoriasAdmin'
 import { useAdicionais } from '@/lib/hooks/useAdicionais'
 import { resumoRegra } from '@/lib/adicionaisRegra'
 import { fmt } from '@/lib/formatters'
+import { thumb } from '@/lib/img'
 import type { Categoria, GrupoAdicional, Produto } from '@/types'
 
 export default function Cardapio() {
@@ -115,7 +116,7 @@ function ProdutosTab({ onToast }: { onToast: (m: string) => void }) {
             {byCat.map((p) => (
               <View key={p.id} className="flex-row items-start gap-3 rounded-xl border border-line bg-surface p-3">
                 <View className="h-14 w-14 items-center justify-center overflow-hidden rounded-lg border border-line bg-bg">
-                  {p.foto_url ? <Image source={{ uri: p.foto_url }} style={{ width: 56, height: 56 }} contentFit="cover" /> : <Text style={{ fontSize: 22 }}>🍽️</Text>}
+                  {p.foto_url ? <Image source={{ uri: thumb(p.foto_url, 112) }} style={{ width: 56, height: 56 }} contentFit="cover" /> : <Text style={{ fontSize: 22 }}>🍽️</Text>}
                 </View>
                 <View className="min-w-0 flex-1">
                   <Text className="font-sans-bold text-sm text-ink" numberOfLines={1}>{p.nome}</Text>

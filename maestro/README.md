@@ -52,6 +52,7 @@ admin `637@admin.com` · cozinha `637@cozinha.com` · garçom `637@garcom.com`.
 | `08-admin-config-geral` | S13 | salvar taxa/pausa (toast) |
 | `09-admin-marca` | S19 | aba Marca renderiza + salvar (toast) |
 | `10-admin-equipe` | S20 | (gated, precisa web) criar/gerenciar equipe |
+| `11-guard-roles` | auditoria item 2 | garçom via **deep link** (`getorderapp://admin`/`cozinha`) é **barrado** (volta pro Salão) |
 
 ## O que o Maestro NÃO cobre (verificar manual / ROTEIRO)
 - **Conteúdo de RN `<Modal>`** (sheet do time-picker, QRModal, checkout, formulários): o driver iOS do

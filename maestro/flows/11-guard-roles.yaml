@@ -1,0 +1,33 @@
+# Auditoria item 2 — guard fino de role por grupo de tela: um GARÇOM logado não alcança
+# /admin nem /cozinha via deep link (getorderapp://admin | getorderapp://cozinha);
+# o guard redireciona para a home do role (Salão). A escrita já era barrada pela RLS.
+appId: com.optmore.getorder.staff
+---
+- runFlow:
+    file: ../helpers/login.yaml
+    env: { EMAIL: "637@garcom.com", SENHA: "teste1234" }
+- extendedWaitUntil:
+    visible: "\\+ Nova comanda"
+    timeout: 30000
+
+# deep link p/ área do ADMIN → volta pro Salão, sem tabs do admin
+- openLink: getorderapp://admin
+# iOS confirma scheme externo com o diálogo "Abrir com 'GetOrder Staff'?" → aceita (se aparecer)
+- tapOn:
+    text: "Abrir|Open"
+    optional: true
+- extendedWaitUntil:
+    visible: "Salão"
+    timeout: 15000
+- assertNotVisible:
+    id: "tab-painel"
+
+# deep link p/ COZINHA → idem (cozinha é admin|cozinha)
+- openLink: getorderapp://cozinha
+- tapOn:
+    text: "Abrir|Open"
+    optional: true
+- extendedWaitUntil:
+    visible: "Salão"
+    timeout: 15000
+- assertNotVisible: "Novos"

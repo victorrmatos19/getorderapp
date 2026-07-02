@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Pressable, ScrollView, Text, TextInput, View } from 'react-native'
 import { Image } from 'expo-image'
 import * as ImagePicker from 'expo-image-picker'
@@ -106,8 +106,9 @@ export function MarcaTab({ restauranteId, onToast }: { restauranteId: string | n
   }
 
   // Previews repintam ao vivo a partir do state local (null quando vazio → defaults).
-  const lightTokens = deriveTheme(primaria || null, accent || null, preco || null)
-  const darkTokens = deriveTheme(primaria || null, accent || null, preco || null, { dark: true })
+  // useMemo (auditoria item 13): só recalcula quando alguma cor muda.
+  const lightTokens = useMemo(() => deriveTheme(primaria || null, accent || null, preco || null), [primaria, accent, preco])
+  const darkTokens = useMemo(() => deriveTheme(primaria || null, accent || null, preco || null, { dark: true }), [primaria, accent, preco])
 
   return (
     <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 24 }}>

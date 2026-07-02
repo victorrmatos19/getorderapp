@@ -2,6 +2,7 @@ import { Pressable, Text, View } from 'react-native'
 import { Image } from 'expo-image'
 import { fmt } from '@/lib/formatters'
 import { precoEfetivo } from '@/lib/calcComanda'
+import { thumb } from '@/lib/img'
 import type { Produto } from '@/types'
 
 function Badge({ label, outline }: { label: string; outline?: boolean }) {
@@ -51,7 +52,7 @@ export function ProductCard({ produto, onOpen, isLast }: { produto: Produto; onO
       </View>
 
       {produto.foto_url ? (
-        <Image source={{ uri: produto.foto_url }} style={{ width: 64, height: 64, borderRadius: 8, backgroundColor: '#F2F0E8' }} contentFit="cover" />
+        <Image source={{ uri: thumb(produto.foto_url, 128) }} style={{ width: 64, height: 64, borderRadius: 8, backgroundColor: '#F2F0E8' }} contentFit="cover" />
       ) : null}
 
       <View className="h-9 w-9 items-center justify-center self-center rounded-xl border border-line">

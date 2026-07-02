@@ -1,9 +1,18 @@
-import { Tabs } from 'expo-router'
+import { Redirect, Tabs } from 'expo-router'
 import { TabBarIcon } from '@/components/TabBarIcon'
+import { useRestaurante } from '@/providers/RestauranteProvider'
 
 // Bottom nav do admin (espelha o AdminNav da web): Painel · Cardápio · Mesas · Equipe · Configs.
 // Ícones em SVG (TabBarIcon) — nada de emoji.
 export default function AdminTabsLayout() {
+  const { role } = useRestaurante()
+
+  // Guard fino de role (auditoria item 2): /admin é SÓ admin — garçom/cozinha via deep link
+  // (getorderapp://admin) voltam para a própria home. Escrita já é barrada pela RLS por role.
+  if (role && role !== 'admin') {
+    return <Redirect href={role === 'garcom' ? '/garcom' : role === 'cozinha' ? '/cozinha' : '/login'} />
+  }
+
   return (
     <Tabs
       screenOptions={{

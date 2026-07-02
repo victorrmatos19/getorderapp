@@ -33,24 +33,37 @@ function useGarcomData() {
 
 export default function GarcomList() {
   const qc = useQueryClient()
-  const { signOut } = useRestaurante()
+  const { restauranteId, signOut } = useRestaurante()
   const { data: rows = [], isLoading, isError, refetch } = useGarcomData()
   const cid = useId()
 
   useEffect(() => {
+    if (!restauranteId) return
+    // Canais filtrados por tenant (auditoria item 1): evento de outro restaurante não chega
+    // nem dispara refetch. Callback re-valida o payload (defesa em profundidade).
+    const soDoTenant = (payload: { new?: unknown; old?: unknown }) => {
+      const rid =
+        (payload.new as { restaurante_id?: string })?.restaurante_id ??
+        (payload.old as { restaurante_id?: string })?.restaurante_id
+      return !rid || rid === restauranteId
+    }
     const ch = supabase
       .channel(`garcom-list-${cid}`)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'comandas' }, () =>
-        qc.invalidateQueries({ queryKey: ['garcom-mesas'] }),
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'comandas', filter: `restaurante_id=eq.${restauranteId}` },
+        (p) => { if (soDoTenant(p)) qc.invalidateQueries({ queryKey: ['garcom-mesas'] }) },
       )
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'itens_pedido' }, () =>
-        qc.invalidateQueries({ queryKey: ['garcom-mesas'] }),
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'itens_pedido', filter: `restaurante_id=eq.${restauranteId}` },
+        (p) => { if (soDoTenant(p)) qc.invalidateQueries({ queryKey: ['garcom-mesas'] }) },
       )
       .subscribe()
     return () => {
       supabase.removeChannel(ch)
     }
-  }, [qc, cid])
+  }, [qc, cid, restauranteId])
 
   const byMesa = useMemo(() => {
     const m = new Map<string, { mesa: Mesa; comandas: Row[] }>()

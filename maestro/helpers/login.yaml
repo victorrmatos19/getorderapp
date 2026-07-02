@@ -14,6 +14,14 @@ appId: com.optmore.getorder.staff
 - tapOn:
     id: "login-senha"
 - inputText: "${SENHA}"
+# Android: o teclado cobre o botão "Entrar" → dispensa antes de tocar.
+# ⚠️ SÓ no Android: no driver iOS o hideKeyboard NÃO é no-op — falha com
+# "Couldn't hide the keyboard" e derruba o flow (foi 11/11 FAIL em 01/07).
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - hideKeyboard
 - tapOn:
     id: "login-entrar"
 # iOS pode mostrar "Salvar Senha?" COM ATRASO após o login (race) → espera assentar e dispensa.
